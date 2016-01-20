@@ -420,20 +420,19 @@ See :github:`mozilla-services/cliquet-fxa`.
 Plugins
 =======
 
-*Kinto* relies on the Pyramid plugin system.
+It is possible to extend the default Kinto behaviors by using "plugins".
 
-The list of plugins to load at startup can be specified in settings, as a list
-of Python modules:
+The list of plugins to load at startup can be specified in the settings, as a
+list of Python modules:
 
 .. code-block:: ini
-
 
     kinto.includes = kinto.plugins.default_bucket
                      kinto-attachment
                      custom-myplugin
 
-See also: :ref:`tutorial-write-plugin`.
-
+See also: :ref:`tutorial-write-plugin` for more in-depth informations on how
+to create your own plugin.
 
 .. _configuring-notifications:
 

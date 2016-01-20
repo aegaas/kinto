@@ -9,15 +9,15 @@ How to write a Kinto plugin
 * Add endpoints for custom URLs (e.g. new hook URL)
 * Add custom endpoint renderers (e.g. XML instead of JSON)
 
-As :ref:`specified in the settings section <configuration-plugins>`, the
-are Python module loaded on startup.
+Kinto plugins are :ref:Python modules loaded on startup <configuration-plugins>`.
 
 In this tutorial, we will build an *ElasticSearch* plugin that will:
 
 * Initialize an indexer on startup;
-* Add a ``/{collection}/search`` end-point;
-* Index records when created/updated/deleted.
+* Add a new ``/{collection}/search`` endpoint;
+* Index the records when they're created, updated, or deleted.
 
+*Kinto* relies on the Pyramid plugin system.
 
 Include me
 ----------
@@ -32,7 +32,6 @@ First, create a Python package and install it locally. For example:
     $ cd kinto-elasticsearch
     $ python setup.py develop
 
-
 In order to be included, a package must define an ``includeme(config)`` function.
 
 For example, in :file:`kinto_elasticsearch/init.py`:
@@ -40,7 +39,7 @@ For example, in :file:`kinto_elasticsearch/init.py`:
 .. code-block:: python
 
     def includeme(config):
-        print("I am ElasticSearch plugin")
+        print("I am the ElasticSearch plugin!")
 
 
 Add it the :file:`config.ini` file:
@@ -49,7 +48,7 @@ Add it the :file:`config.ini` file:
 
     kinto.includes = kinto_elasticsearch
 
-Our message should not appear on ``kinto start``.
+Our message should now appear on ``kinto start``.
 
 
 Simple indexer
@@ -112,6 +111,9 @@ And a simple method to load from configuration:
 Initialize on startup
 ---------------------
 
+We now need to initialize the indexer when kinto starts. It happens in the
+`includeme` function.
+
 .. code-block:: python
     :emphasize-lines: 4
 
@@ -125,7 +127,7 @@ Initialize on startup
 Add a search view
 -----------------
 
-Add an end-point definition in :file:`kinto_elasticsearch/views.py`:
+Add an endpoint definition in :file:`kinto_elasticsearch/views.py`:
 
 .. code-block:: python
 
@@ -174,7 +176,6 @@ Index records on change
 
 When a record changes, we update its indexed version:
 
-
 .. code-block:: python
 
     def on_resource_changed(event):
@@ -201,7 +202,7 @@ When a record changes, we update its indexed version:
                                    record=change['old'],
                                    id='id')
 
-And then we bind:
+And then we bind the method with the cliquet events:
 
 .. code-block:: python
     :emphasize-lines: 1,13,14
@@ -225,13 +226,14 @@ And then we bind:
 Test it altogether
 ------------------
 
+We're almost done! Now, let's check if it works properly:
+
+Adding a new record:
 ::
 
     $ echo '{"data": {"note": "kinto"}}' | http --auth alice: --verbose --form POST http://localhost:8888/v1/buckets/default/collections/assets/records
 
-
-
+It should be possible to search for it:
 ::
 
     $ http --auth alice: --verbose --form POST http://localhost:8888/v1/buckets/default/collections/assets/search
-
