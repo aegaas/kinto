@@ -415,6 +415,26 @@ values for OAuth2 client settings.
 See :github:`mozilla-services/cliquet-fxa`.
 
 
+.. _configuring-plugins:
+
+Plugins
+=======
+
+*Kinto* relies on the Pyramid plugin system.
+
+The list of plugins to load at startup can be specified in settings, as a list
+of Python modules:
+
+.. code-block:: ini
+
+
+    kinto.includes = kinto.plugins.default_bucket
+                     kinto-attachment
+                     custom-myplugin
+
+See also: :ref:`tutorial-write-plugin`.
+
+
 .. _configuring-notifications:
 
 Notifications
