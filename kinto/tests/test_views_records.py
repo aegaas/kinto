@@ -205,7 +205,11 @@ class RecordsViewTest(BaseWebTest, unittest.TestCase):
                      status=200)
 
     def test_record_creation_by_group_member(self):
-        bucket = {'permissions': {'write': ['system.Authenticated']}}
+        bucket = {
+            'permissions': {
+                'collection:create': ['system.Authenticated']
+            }
+        }
         self.app.put_json('/buckets/candy', bucket,
                           headers=self.headers)
         # create as aaron
@@ -224,20 +228,19 @@ class RecordsViewTest(BaseWebTest, unittest.TestCase):
                                   headers=self.kelly_headers,
                                   status=200)
 
+        # create the group junkies
         members = [
             aaron_resp.json['user']['id'],
             kelly_resp.json['user']['id']
         ]
         self.create_group('candy', 'junkies', members)
 
+        # create a collection with write access.
+        collection_url = '/buckets/candy/collections/lollies'
         collection = MINIMALIST_COLLECTION.copy()
         collection['permissions'] = {
             'write': ['/buckets/candy/groups/junkies']
         }
-
-        collection_url = '/buckets/candy/collections/lollies'
-
-        # create a collection with write access.
         self.app.put_json(collection_url,
                           collection,
                           headers=self.headers,
@@ -246,11 +249,9 @@ class RecordsViewTest(BaseWebTest, unittest.TestCase):
                            MINIMALIST_RECORD,
                            headers=self.aaron_headers,
                            status=201)
-
         resp = self.app.get(collection_url + '/records',
                             headers=self.kelly_headers,
                             status=200)
-
         record_id = resp.json['data'][0]['id']
         record_url = '%s/records/%s' % (collection_url, record_id)
         self.app.get(record_url,
